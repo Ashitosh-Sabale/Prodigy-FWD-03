@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Store E-commerce Platform</title>
+  <style>
+    /* General styling */
+    body { font-family: Arial, sans-serif; background-color: #f7f7f7; margin: 0; padding: 0; }
+    .navbar, footer { background-color: #333; color: #fff; padding: 10px 20px; text-align: center; }
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 5px; }
+    .navbar a { color: white; margin: 0 15px; text-decoration: none; cursor: pointer; }
+    .section { display: none; margin-top: 20px; }
+    .form-group { margin: 10px 0; }
+    .product-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    .chat-box, .tracking-info { border: 1px solid #ddd; padding: 15px; border-radius: 5px; max-height: 300px; overflow-y: auto; }
+
+    /* Buttons */
+    button { background-color: #333; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #555; }
+
+    /* Input Fields */
+    input[type="text"], input[type="number"], input[type="file"] {
+      width: calc(100% - 20px); padding: 8px 10px; margin: 5px 0; border-radius: 4px; border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <a onclick="showSection('addProduct')">Add Product</a>
+    <a onclick="showSection('viewProducts')">View Products</a>
+    <a onclick="showSection('customerService')">Customer Service</a>
+    <a onclick="showSection('orderTracking')">Order Tracking</a>
+  </div>
+
+  <!-- Container for sections -->
+  <div class="container">
+    
+    <!-- Add Product Section -->
+    <div id="addProduct" class="section">
+      <h2>Add Product</h2>
+      <div class="form-group">
+        <input type="text" id="productName" placeholder="Product Name" required>
+      </div>
+      <div class="form-group">
+        <input type="number" id="productPrice" placeholder="Price" required>
+      </div>
+      <div class="form-group">
+        <input type="file" id="productImage" accept="image/*" required>
+      </div>
+      <button onclick="addProduct()">Add Product</button>
+    </div>
+
+    <!-- View Products Section -->
+    <div id="viewProducts" class="section">
+      <h2>View Products</h2>
+      <div id="productsContainer"></div>
+    </div>
+
+    <!-- Customer Service Section -->
+    <div id="customerService" class="section">
+      <h2>Customer Service</h2>
+      <div class="chat-box" id="chatBox"></div>
+      <input type="text" id="userMessage" placeholder="Type your message">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Order Tracking Section -->
+    <div id="orderTracking" class="section">
+      <h2>Order Tracking</h2>
+      <div class="tracking-info" id="trackingInfo">Track your order status here.</div>
+      <button onclick="trackOrder()">Track Order</button>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>© 2023 Local Store E-commerce</footer>
+
+  <script>
+    // Show the selected section
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
+      document.getElementById(sectionId).style.display = 'block';
+    }
+    showSection('addProduct'); // Show Add Product section by default
+
+    // Add Product functionality
+    function addProduct() {
+      const name = document.getElementById('productName').value;
+      const price = document.getElementById('productPrice').value;
+      const image = document.getElementById('productImage').files[0];
+      
+      const reader = new FileReader();
+      reader.readAsDataURL(image);
+      reader.onloadend = function () {
+        const product = { name: name, price: price, image: reader.result };
+        
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        products.push(product);
+        localStorage.setItem('products', JSON.stringify(products));
+        
+        alert('Product added successfully!');
+        showSection('viewProducts');
+        loadProducts();
+      };
+    }
+
+    // Load and display products in View Products section
+    function loadProducts() {
+      const productsContainer = document.getElementById('productsContainer');
+      const products = JSON.parse(localStorage.getItem('products')) || [];
+      
+      productsContainer.innerHTML = products.map(product => `
+        <div class="product-card">
+          <img src="${product.image}" alt="${product.name}" style="width:100%; max-height:150px; object-fit:cover;">
+          <h3>${product.name}</h3>
+          <p>Price: ${product.price}</p>
+        </div>
+      `).join('');
+    }
+    loadProducts(); // Initial load
+
+    // Simulate chat support
+    function sendMessage() {
+      const message = document.getElementById('userMessage').value;
+      const chatBox = document.getElementById('chatBox');
+      const userMsg = document.createElement('div');
+      userMsg.textContent = `You: ${message}`;
+      chatBox.appendChild(userMsg);
+      document.getElementById('userMessage').value = '';
+
+      setTimeout(() => {
+        const botResponse = document.createElement('div');
+        botResponse.textContent = 'Customer Support: How can we assist you?';
+        botResponse.style.color = 'green';
+        chatBox.appendChild(botResponse);
+      }, 1000);
+    }
+
+    // Simulate order tracking
+    function trackOrder() {
+      document.getElementById('trackingInfo').innerText = 'Your order is in transit and will arrive soon!';
+    }
+  </script>
+</body>
+</html>

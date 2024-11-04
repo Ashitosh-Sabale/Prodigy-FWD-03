@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Local Store E-commerce</title>
+  <style>
+    /* Body and Navbar Styling */
+    body {
+      background-color: #f1f3f6;
+      font-family: Arial, sans-serif;
+    }
+
+    .navbar {
+      background-color: #2874f0;
+      padding: 10px 20px;
+    }
+
+    .navbar a {
+      color: #f7eeee;
+      margin-right: 15px;
+      font-weight: 500;
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    /* Container Styling */
+    .container {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    /* Add Product Form Styling */
+    #addProduct {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-control {
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .btn-primary {
+      background-color: #2874f0;
+      border: none;
+      font-weight: bold;
+    }
+
+    /* Product Card Styling */
+    .product-card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .product-card img {
+      max-height: 150px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .product-title {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .product-price {
+      color: #2874f0;
+      font-weight: bold;
+    }
+
+    /* Footer Styling */
+    footer {
+      background-color: #2874f0;
+      color: #fff;
+      text-align: center;
+      padding: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand">Local Store</a>
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" onclick="showSection('addProduct')">Add Product</a>
+      <a class="nav-item nav-link" onclick="showSection('viewProducts')">View Products</a>
+      <a class="nav-item nav-link" onclick="showSection('customerService')">Customer Service</a>
+      <a class="nav-item nav-link" onclick="showSection('orderTracking')">Order Tracking</a>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Add Product Section -->
+    <div id="addProduct" class="section">
+      <h4 class="text-center">Add New Product</h4>
+      <form>
+        <div class="form-group">
+          <label for="productName">Product Name</label>
+          <input type="text" id="productName" class="form-control" placeholder="Enter product name" required>
+        </div>
+        <div class="form-group">
+          <label for="productPrice">Price</label>
+          <input type="number" id="productPrice" class="form-control" placeholder="Enter product price" required>
+        </div>
+        <div class="form-group">
+          <label for="productImage">Product Image</label>
+          <input type="file" id="productImage" class="form-control" accept="image/*" required>
+        </div>
+        <button type="button" onclick="addProduct()" class="btn btn-primary btn-block">Add Product</button>
+      </form>
+    </div>
+
+    <!-- View Products Section -->
+    <div id="viewProducts" class="section" style="display: none;">
+      <h4 class="text-center">Available Products</h4>
+      <div id="productsContainer" class="row"></div>
+    </div>
+
+    <!-- Customer Service Section -->
+    <div id="customerService" class="section" style="display: none;">
+      <h4 class="text-center">Customer Service Chat</h4>
+      <div class="form-group">
+        <textarea id="chatBox" class="form-control" rows="5" readonly>Welcome! How can we assist you?</textarea>
+      </div>
+      <input type="text" id="userMessage" class="form-control" placeholder="Type your message">
+      <button onclick="sendMessage()" class="btn btn-primary btn-block mt-2">Send</button>
+    </div>
+
+    <!-- Order Tracking Section -->
+    <div id="orderTracking" class="section" style="display: none;">
+      <h4 class="text-center">Order Tracking</h4>
+      <div class="tracking-info alert alert-info">Your order is being processed and will be delivered soon.</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>© 2023 Local Store E-commerce</footer>
+
+  <script>
+    // Display selected section
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
+      document.getElementById(sectionId).style.display = 'block';
+    }
+    showSection('addProduct'); // Default section
+
+    // Add product and store in local storage
+    function addProduct() {
+      const name = document.getElementById('productName').value;
+      const price = document.getElementById('productPrice').value;
+      const image = document.getElementById('productImage').files[0];
+      
+      const reader = new FileReader();
+      reader.readAsDataURL(image);
+      reader.onloadend = function () {
+        const product = { name, price, image: reader.result };
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        products.push(product);
+        localStorage.setItem('products', JSON.stringify(products));
+        
+        alert('Product added successfully!');
+        showSection('viewProducts');
+        loadProducts();
+      };
+    }
+
+    // Load products from local storage and display
+    function loadProducts() {
+      const productsContainer = document.getElementById('productsContainer');
+      const products = JSON.parse(localStorage.getItem('products')) || [];
+      
+      productsContainer.innerHTML = products.map(product => `
+        <div class="col-md-4">
+          <div class="product-card text-center">
+            <img src="${product.image}" alt="${product.name}" class="img-fluid">
+            <h5 class="product-title">${product.name}</h5>
+            <p class="product-price">₹${product.price}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+    loadProducts(); // Initial load
+
+    // Customer service chat simulation
+    function sendMessage() {
+      const message = document.getElementById('userMessage').value;
+      const chatBox = document.getElementById('chatBox');
+      chatBox.value += `\nYou: ${message}`;
+      document.getElementById('userMessage').value = '';
+
+      setTimeout(() => {
+        chatBox.value += `\nSupport: We're here to help!`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
